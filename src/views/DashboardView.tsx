@@ -14,7 +14,8 @@ import {
   Cell,
 } from 'recharts'
 import { formatCurrency, formatCompact } from '../lib/utils'
-import { Lightbulb, ChevronDown, ChevronUp } from 'lucide-react'
+import { exportToExcel, exportToPDF, generateTitle } from '../lib/export'
+import { Lightbulb, ChevronDown, ChevronUp, FileText, FileSpreadsheet } from 'lucide-react'
 
 const MONTHS = [
   'Enero',
@@ -53,6 +54,45 @@ export function DashboardView() {
   const totalExpense = 18500000
   const margin = ((totalIncome - totalExpense) / totalIncome) * 100
 
+  const periodTitle = generateTitle('Dashboard Ventas & KPIs', {
+    Año: year,
+    Mes: month,
+  })
+
+  const handleExportExcel = () => {
+    exportToExcel(
+      `Ventas_KPIs_${year}_${month}.xlsx`,
+      periodTitle,
+      [
+        { header: 'Mes', accessor: (r) => r.month, width: 12 },
+        { header: 'Facturación', accessor: (r) => r.current, width: 18, align: 'right' },
+        { header: 'Mes anterior', accessor: (r) => r.previous, width: 18, align: 'right' },
+        { header: 'Año anterior', accessor: (r) => r.lastYear, width: 18, align: 'right' },
+      ],
+      MOCK_DATA,
+      [
+        { label: 'TOTAL', values: ['', totalIncome, MOCK_DATA.reduce((a, b) => a + b.previous, 0), MOCK_DATA.reduce((a, b) => a + b.lastYear, 0)] },
+      ]
+    )
+  }
+
+  const handleExportPDF = () => {
+    exportToPDF(
+      periodTitle,
+      'Espacio San Lorenzo — Foco de control y operaciones',
+      [
+        { header: 'Mes', accessor: (r) => r.month, width: 12 },
+        { header: 'Facturación', accessor: (r) => r.current, width: 18, align: 'right' },
+        { header: 'Mes anterior', accessor: (r) => r.previous, width: 18, align: 'right' },
+        { header: 'Año anterior', accessor: (r) => r.lastYear, width: 18, align: 'right' },
+      ],
+      MOCK_DATA,
+      [
+        { label: 'TOTAL', values: ['', totalIncome, MOCK_DATA.reduce((a, b) => a + b.previous, 0), MOCK_DATA.reduce((a, b) => a + b.lastYear, 0)] },
+      ]
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -87,6 +127,22 @@ export function DashboardView() {
             </select>
           </div>
           <Button variant="secondary" size="sm">Todo el período</Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleExportPDF}
+            className="bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20"
+          >
+            <FileText className="h-4 w-4" /> PDF
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleExportExcel}
+            className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+          >
+            <FileSpreadsheet className="h-4 w-4" /> Excel
+          </Button>
         </div>
       </div>
 
